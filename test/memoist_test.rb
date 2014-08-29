@@ -6,16 +6,15 @@ class MemoistTest < Minitest::Unit::TestCase
   class CallCounter
 
     def initialize
-      @calls = {}
+      @calls = Hash.new(0)
     end
 
     def call(method_name)
-      @calls[method_name] ||= 0
       @calls[method_name] += 1
     end
 
     def count(method_name)
-      @calls[method_name] ||= 0
+      @calls[method_name]
     end
 
   end

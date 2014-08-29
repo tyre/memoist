@@ -1,6 +1,7 @@
 require 'memoist/core_ext/singleton_class'
 
 module Memoist
+  @@memoize_next_method = false
 
   def self.memoized_ivar_for(method_name, identifier=nil)
     ["@#{memoized_prefix(identifier)}", escape_punctuation(method_name.to_s)].join("_")
@@ -84,6 +85,8 @@ module Memoist
   end
 
   def memoize(*method_names)
+    @@memoize_next_method = true && return if method_names.empty?
+
     if method_names.last.is_a?(Hash)
       identifier = method_names.pop[:identifier]
     end
@@ -195,6 +198,14 @@ module Memoist
     end
     # return a chainable method_name symbol if we can
     method_names.length == 1 ? method_names.first : method_names
+  end
+
+  def method_added(method_name)
+    if @@memoize_next_method
+      @@memoize_next_method = false
+      memoize :method_name
+    end
+    super
   end
 
   class AlreadyMemoizedError < RuntimeError; end
